@@ -76,7 +76,7 @@ namespace container {
 
 		template<typename...Args>
 		constexpr decltype(auto) emplace(Args&&...args) {
-			return container.emplace(std::forward<Args>(args)...);
+			return container.emplace_back(std::forward<Args>(args)...);
 		}
 	};
 
