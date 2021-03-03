@@ -602,7 +602,7 @@ namespace container {
 					other_temp = other_temp->next;
 				}
 			}
-			return (notEqual) ? false : true;
+			return notEqual;
 		}
 
 		constexpr bool operator!= (const List& other) {
