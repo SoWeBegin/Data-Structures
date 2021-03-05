@@ -590,19 +590,19 @@ namespace container {
 		constexpr bool operator== (const List& other) {
 			Node* temp = m_head;
 			Node* other_temp = other.m_head;
-			bool notEqual = false;
+			bool isEqual = true;
 			if (m_size != other.size()) return false;
 			else {
 				while (temp != nullptr && other_temp != nullptr) {
 					if (temp->data != other_temp->data) {
-						notEqual = true;
+						isEqual = false;
 						break;
 					}
 					temp = temp->next;
 					other_temp = other_temp->next;
 				}
 			}
-			return notEqual;
+			return isEqual;
 		}
 
 		constexpr bool operator!= (const List& other) {
