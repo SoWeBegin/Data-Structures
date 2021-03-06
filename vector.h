@@ -225,59 +225,32 @@ namespace container {
 			tempVect = nullptr;
 		}
 
-		constexpr void shift_and_construct(std::size_t index_pos, const Type& value, std::size_t count = 1) {
-			// Should provide strong exception guarantee.
+		constexpr void shift_and_construct(std::size_t index_pos, const Type& value, std::size_t count = 1) noexcept {
+			// Should provide strong exception guarantee; to be updated...
 
-			size_type copies_made{ 0 };
-			size_type copies_made1{ 0 };
-			size_type copies_made2{ 0 };
+	
 			auto count_after_last_element = m_vector + size() + count;
 			auto last_element = m_vector + size();
 			auto current_pos = m_vector + index_pos;
-
-			try {
-				for (std::size_t index{ 0 }; index < count; ++index) {
-					std::allocator_traits<allocator_type>::construct(m_allocator, m_vector + size() + index, m_vector[size() + index]);
-					++copies_made;
-				}
+			// Constructs on needed space to assign new elements later
+			for (std::size_t index{ 0 }; index < count; ++index) {
+				std::allocator_traits<allocator_type>::construct(m_allocator, m_vector + size() + index, m_vector[size() + index]);
 			}
-			catch (...) {
-				for (std::size_t index{ 0 }; index < copies_made; ++index)
-					std::allocator_traits<allocator_type>::destroy(m_allocator, m_vector + size() + index);
-				throw;
+			//Assign the elements (= move them to their new places)
+			while (current_pos++ != m_vector + size()) {
+				*(--(count_after_last_element)) = *(--(last_element));
 			}
-
-			try {
-				while (current_pos++ != m_vector + size()) {
-					*(--(count_after_last_element)) = *(--(last_element));
-					++copies_made1;
-				}
-			}
-			catch (...) {
-				while (copies_made1 != 0) {
-					std::allocator_traits<Allocator>::destroy(m_allocator, m_vector + size() + 1 + copies_made1);
-					--copies_made1;
-				}
-				throw;
-			}
-
+			
 			//std::copy_backward(m_vector + index_pos, m_vector + size(), m_vector + size() + count);
+			// Destruct current elements that have been moved
 			for (std::size_t index{ 0 }; index < count; ++index) {
 				std::allocator_traits<allocator_type>::destroy(m_allocator, m_vector + index_pos + index);
 			}
-
-			try {
-				for (std::size_t index{ 0 }; index < count; ++index) {
-					std::allocator_traits<allocator_type>::construct(m_allocator, m_vector + index_pos + index, value);
-					++copies_made2;
-				}
+			// Construct new values in the previous-elements-place
+			for (std::size_t index{ 0 }; index < count; ++index) {
+				std::allocator_traits<allocator_type>::construct(m_allocator, m_vector + index_pos + index, value);
 			}
-			catch (...) {
-				for (std::size_t index{ 0 }; index < copies_made2; ++index) {
-					std::allocator_traits<allocator_type>::destroy(m_allocator, m_vector + size() + index);
-				}
-				throw;
-			}
+			
 			m_size += count;
 		}
 
