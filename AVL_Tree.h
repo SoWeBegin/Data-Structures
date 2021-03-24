@@ -65,8 +65,6 @@ namespace container {
 		}
 
 		constexpr void rebalance(Node*& current, const Key& data) {
-			current->balance_factor = get_height(current->left) - get_height(current->right);
-
 			if (current->balance_factor > 1 && data < current->left->data) {
 				rotate_right(current);
 			}
