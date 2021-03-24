@@ -296,15 +296,13 @@ namespace container {
 				// Case 3: Two children. Two ways to proceed: Either take the largest element of the left-child, or the smallest element from the right-child. Then we just delete the current node
 				// And assign it the chosen child.
 				else {
-					// Find the Node that holds the largest element in the left-subtree. Note that since it's the largest element, the node will be the last one in the sub-stree.
-					Node* left_largest = get_largest(current);
-					// Keep track of the current's node right and left children, so we can link them up with the new Node.
-					Node* previous_left = current->left;
-					delete current;
-					current = left_largest; // We can safely assign the Node holding the largest element to the current node, since it has no children.
-
-					left_largest = nullptr;
-					current->right = previous_left;
+					// Get the node holding the min. value on the right side
+					Node* right_min = get_min(current->right);
+					// Assign that data to current
+					current->data = right_min->data;
+					// Delete the node we just assigned to current through a recursive call. Since the node we're deleting is the last one,
+					// the deletion will happen in one of the above if cases.
+					remove(current->right, right_min->data);
 				}
 				--m_size;
 			}
