@@ -261,10 +261,10 @@ namespace container {
 
 	private:
 		// Example adapted from GeeksforGeeks
-		constexpr Node* get_largest(Node* current) const {
+		constexpr Node* get_min(Node* current) const {
 			Node* curr = current;
-			while (curr->right != nullptr) {
-				curr = curr->right;
+			while (curr->left != nullptr) {
+				curr = curr->left;
 			}
 
 			return curr;
