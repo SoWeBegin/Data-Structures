@@ -228,7 +228,7 @@ namespace container {
 		}
 
 		// Other functions similar to the standard std::set
-		constexpr void empty() const noexcept {
+		constexpr bool empty() const noexcept {
 			return m_size == 0;
 		}
 
