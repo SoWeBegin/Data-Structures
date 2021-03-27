@@ -7,7 +7,7 @@
 #include <initializer_list>
 #include <memory>
 #include <utility>
-// Note: #include <iostream> needed for the traversal-print functions.
+// Note: #include <iostream> only needed for the traversal-print functions (in case you pass e.g std::cout as argument)
 
 /* Basic implementation of a simple AVL Tree data structure. A lot of "Standard" functions and overloads are missing. */
 /* Iterators are missing on purpose as well: this implementation is supposed to be read by beginners unlike the previous ones, and also, this is only meant for learning purposes. */
