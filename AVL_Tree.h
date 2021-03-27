@@ -101,33 +101,37 @@ namespace container {
 
 	public:
 		// Traversal
-		constexpr void cout_pre_order(const Node* root) noexcept {
+		// First parameter: The stream, eg std::cout. Use: cout_pre_order(std::cout, classObject.getRoot())
+		template<typename Stream>
+		constexpr void cout_pre_order(Stream& stream, const Node* root) noexcept {
 			if (root != nullptr) {
 				// Pre-order execution: root->left->right. Since first case is root, we first need to cout the root's data; then recursively visit all left nodes, print them -> visit all right nodes, 
 				// and print them.
-				std::cout << root->data << ' ';
+				stream << root->data << ' ';
 				cout_pre_order(root->left);
 				cout_pre_order(root->right);
 			}
 		}
-
-		constexpr void cout_post_order(const Node* root) noexcept {
+		
+		template<typename Stream>
+		constexpr void cout_post_order(Stream& stream, const Node* root) noexcept {
 			if (root != nullptr) {
 				// Post-order execution: Left->right->root. We first need to go int he deepest left-node; Once this is done recursively, we'll traverse to the deepest right-node.
 				// Note that due to stack unwinding all the arguments, and function variables are still in memory. Due to stack unwinding the deepest left-node will be printed, then the deepest right-node,
 				// until we hit the root.
 				cout_post_order(m_root->left);
 				cout_post_order(m_root->right);
-				std::cout << root->data;
+				stream << root->data;
 			}
 		}
 
-		constexpr void cout_in_order(const Node* root) noexcept {
+		template<typename Stream>
+		constexpr void cout_in_order(Stream& stream, const Node* root) noexcept {
 			if (root != nullptr) {
 				// In-order execution: Left->root->right. Since the first case is the deepest left node, we first recursively traverse until we find it. When that is done, we print it;
 				// Again, due to the stack remembering all local variables and arguments, we can then print the deepest-right node.
 				cout_in_order(root->left);
-				std::cout << root->data;
+				stream << root->data;
 				cout_in_order(root->right);
 			}
 		}
