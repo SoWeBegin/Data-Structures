@@ -321,10 +321,10 @@ namespace container {
 		}
 
 		constexpr void rehash(size_type n) {
-			hash_table temp{ m_table };	// Copy the contents of the current hash table
-			m_table.clear();		// Remove all elements from our table
-			m_size = 0;			// Reset the size (total elements in the table). The insert function will increase it on each insertion.
-			m_bucket_count = n; 		// Double the total number of buckets
+			hash_table temp{ m_table };	
+			m_table.clear();		
+			m_size = 0;			
+			m_bucket_count = n; 		
 			m_table.resize(m_bucket_count);
 			for (const auto& current_bucket : temp) {
 				for (const auto& current_pair : current_bucket) {
