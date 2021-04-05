@@ -16,13 +16,13 @@ namespace container {
 	class HashTable {
 	private:
 		using hash_table = std::vector<std::list<std::pair<const Key, Type>>>;
-		std::size_t m_size{};										 // Total elements inserted - not size of the vector. 
-		Hash m_hash;												 // Keep track of the constructed hash through e.g the constructors, so we can use it for the hashing functions in the STL
-																	 // Grow factor must be defined before m_bucket_count, otherwise we can't initialize the latter properly (initialization happens from top-bottom)
-		inline static const double grow_factor = 2.0;     			 // The size of the table has to be a bit bigger than the total elements, to avoid too many collisions
-		inline static const double m_max_load_factor = 1.0;			 // Whenever the load factor is > than 0.75 we'll need to rehash
-		std::size_t m_bucket_count{};								 // size of vector (= total buckets)
-		std::vector<std::list<std::pair<const Key, Type>>> m_table;  // Actual hash table - each vector's element is composed off by a list - each list contains Key-Value pairs
+		std::size_t m_size{};				  	    // Total elements inserted - not size of the vector. 
+		Hash m_hash;					  	    // Keep track of the constructed hash through e.g the constructors, so we can use it for the hashing functions in the STL
+							       	  	    // Grow factor must be defined before m_bucket_count, otherwise we can't initialize the latter properly (initialization happens from top-bottom)
+		inline static const double grow_factor = 2.0;     	    // The size of the table has to be a bit bigger than the total elements, to avoid too many collisions
+		inline static const double m_max_load_factor = 1.0; 	    // Whenever the load factor is > than 0.75 we'll need to rehash
+		std::size_t m_bucket_count{};			 	    // size of vector (= total buckets)
+		std::vector<std::list<std::pair<const Key, Type>>> m_table; // Actual hash table - each vector's element is composed off by a list - each list contains Key-Value pairs
 		// static used since all classes will share the same value (which is const), but also to make sure we can use the implicitly-declared move constructor
 
 
@@ -321,10 +321,10 @@ namespace container {
 		}
 
 		constexpr void rehash(size_type n) {
-			hash_table temp{ m_table };	   // Copy the contents of the current hash table
-			m_table.clear();			   // Remove all elements from our table
-			m_size = 0;					   // Reset the size (total elements in the table). The insert function will increase it on each insertion.
-			m_bucket_count = n; // Double the total number of buckets
+			hash_table temp{ m_table };	// Copy the contents of the current hash table
+			m_table.clear();		// Remove all elements from our table
+			m_size = 0;			// Reset the size (total elements in the table). The insert function will increase it on each insertion.
+			m_bucket_count = n; 		// Double the total number of buckets
 			m_table.resize(m_bucket_count);
 			for (const auto& current_bucket : temp) {
 				for (const auto& current_pair : current_bucket) {
@@ -335,9 +335,9 @@ namespace container {
 
 	public:
 		constexpr void rehash() {
-			hash_table temp{ m_table };	   // Copy the contents of the current hash table
-			m_table.clear();			   // Remove all elements from our table
-			m_size = 0;					   // Reset the size (total elements in the table). The insert function will increase it on each insertion.
+			hash_table temp{ m_table }; // Copy the contents of the current hash table
+			m_table.clear(); // Remove all elements from our table
+			m_size = 0;	 // Reset the size (total elements in the table). The insert function will increase it on each insertion.
 			m_bucket_count = static_cast<size_type>(m_bucket_count * grow_factor); // Double the total number of buckets
 			m_table.resize(m_bucket_count);
 			for (const auto& current_bucket : temp) {
