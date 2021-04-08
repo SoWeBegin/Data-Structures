@@ -1,5 +1,6 @@
-#ifndef HASHTABLE_IMPLEMENTATION
-#define HASHTABLE_IMPLEMENTATION
+#ifndef HASH_TABLE_IMPLEMENTATION
+#define HASH_TABLE_IMPLEMENTATION
+
 
 #include <algorithm>
 #include <cstddef>
@@ -16,13 +17,13 @@ namespace container {
 	class HashTable {
 	private:
 		using hash_table = std::vector<std::list<std::pair<const Key, Type>>>;
-		std::size_t m_size{};				  	    // Total elements inserted - not size of the vector. 
-		Hash m_hash;					  	    // Keep track of the constructed hash through e.g the constructors, so we can use it for the hashing functions in the STL
-							       	  	    // Grow factor must be defined before m_bucket_count, otherwise we can't initialize the latter properly (initialization happens from top-bottom)
-		inline static const double grow_factor = 2.0;     	    // The size of the table has to be a bit bigger than the total elements, to avoid too many collisions
-		inline static const double m_max_load_factor = 1.0; 	    // Whenever the load factor is > than 0.75 we'll need to rehash
-		std::size_t m_bucket_count{};			 	    // size of vector (= total buckets)
-		std::vector<std::list<std::pair<const Key, Type>>> m_table; // Actual hash table - each vector's element is composed off by a list - each list contains Key-Value pairs
+		std::size_t m_size{};					   // Total elements inserted - not size of the vector. 
+		Hash m_hash;						   // Keep track of the constructed hash through e.g the constructors, so we can use it for the hashing functions in the STL
+									   // Grow factor must be defined before m_bucket_count, otherwise we can't initialize the latter properly (initialization happens from top-bottom)
+		inline static const double grow_factor = 2.0;     	   // The size of the table has to be a bit bigger than the total elements, to avoid too many collisions
+		inline static const double m_max_load_factor = 1.0;	   // Whenever the load factor is > than 0.75 we'll need to rehash
+		std::size_t m_bucket_count{};				   // size of vector (= total buckets)
+		std::vector<std::list<std::pair<const Key, Type>>> m_table;  // Actual hash table - each vector's element is composed off by a list - each list contains Key-Value pairs
 		// static used since all classes will share the same value (which is const), but also to make sure we can use the implicitly-declared move constructor
 
 
@@ -122,6 +123,7 @@ namespace container {
 		}
 
 	public:
+		// Should be O(1) average, O(n) if rehashing is done (on average)
 		constexpr bool insert(const value_type& value) {
 			size_type index{ m_hash(value.first) % m_bucket_count };
 			auto& bucket{ m_table.at(index) };
@@ -153,6 +155,7 @@ namespace container {
 		}
 
 		template<typename Val>
+		// Amortized O(1); worst case O(n)
 		constexpr bool insert_or_assign(const Key& key, Val&& value) {
 			size_type index{ m_hash(key) % m_bucket_count };
 			auto& bucket{ m_table.at(index) };
@@ -179,20 +182,21 @@ namespace container {
 			return true;
 		}
 
+		// Average O(1) [e.g list doesn't contain lots of elements], forst O(n)
 		constexpr bool remove_by_key(const Key& key) {
-			for (size_type index{ 0 }; auto & current_list : m_table) {
-				for (auto& current_pair : current_list) {
-					if (current_pair.first == key) {
-						m_table.at(index).remove(current_pair);
-						--m_size;
-						return true;
-					}
+			size_type index{ m_hash(key) % m_bucket_count };
+			auto& bucket{ m_table.at(index) };
+			for (const auto& elem : bucket) {
+				if (elem.first == key) {
+					bucket.remove(elem);
+					--m_size;
+					return true;
 				}
-				++index;
 			}
 			return false;
 		}
 
+		// Average O(n) [eg. list doesn't contain lots of elements], worst O(n^2)
 		constexpr bool remove_by_value(const Type& value) {
 			for (size_type index{ 0 }; auto & current_list : m_table) {
 				for (auto& current_pair : current_list) {
@@ -249,19 +253,24 @@ namespace container {
 			return current_list.front().second;
 		}
 
+		// Average O(1), worst case O(n)
 		constexpr size_type count(const Key& key) const {
-			for (const auto& list : m_table) {
-				for (const auto& pair : list) {
-					if (pair.first == key) return 1;
+			size_type index{ m_hash(key) % m_bucket_count };
+			auto& bucket{ m_table.at(index) };
+			for (const auto& elem : bucket) {
+				if (elem.first == key) {
+					return 1;
 				}
 			}
 			return 0;
 		}
 
+		// Average O(1), worst O(n)
 		constexpr bool contains_key(const Key& key) const {
 			return count(key) == 1 ? true : false;
 		}
 
+		// Average O(n), worst O(n^2)
 		constexpr bool contains_value(const Type& value) const {
 			for (size_type index{ 0 }; auto & current_list : m_table) {
 				for (auto& current_pair : current_list) {
@@ -286,15 +295,9 @@ namespace container {
 			return m_table.at(index).size();
 		}
 
-		constexpr std::ptrdiff_t bucket(const Key& key) const {
-			for (size_type index{ 0 }; const auto & current_list : m_table) {
-				for (auto& current_pair : current_list) {
-					if (current_pair.first == key) {
-						return index;
-					}
-				}
-			}
-			return -1;
+		constexpr size_type bucket(const Key& key) const {
+			const size_type index{ m_hash(key) % m_bucket_count };
+			return index;
 		}
 
 		// Hash related
@@ -320,11 +323,12 @@ namespace container {
 			return static_cast<double>(m_size) / m_bucket_count;
 		}
 
+		// Average case O(n), worst O(n^2)
 		constexpr void rehash(size_type n) {
-			hash_table temp{ m_table };	
-			m_table.clear();		
-			m_size = 0;			
-			m_bucket_count = n; 		
+			hash_table temp{ m_table };  // Copy the contents of the current hash table
+			m_table.clear();	     // Remove all elements from our table
+			m_size = 0;		     // Reset the size (total elements in the table). The insert function will increase it on each insertion.
+			m_bucket_count = n;	     // Double the total number of buckets
 			m_table.resize(m_bucket_count);
 			for (const auto& current_bucket : temp) {
 				for (const auto& current_pair : current_bucket) {
@@ -335,10 +339,10 @@ namespace container {
 
 	public:
 		constexpr void rehash() {
-			hash_table temp{ m_table }; // Copy the contents of the current hash table
-			m_table.clear(); // Remove all elements from our table
-			m_size = 0;	 // Reset the size (total elements in the table). The insert function will increase it on each insertion.
-			m_bucket_count = static_cast<size_type>(m_bucket_count * grow_factor); // Double the total number of buckets
+			hash_table temp{ m_table };	  
+			m_table.clear();			 
+			m_size = 0;					  
+			m_bucket_count = static_cast<size_type>(m_bucket_count * grow_factor); 
 			m_table.resize(m_bucket_count);
 			for (const auto& current_bucket : temp) {
 				for (const auto& current_pair : current_bucket) {
@@ -360,6 +364,5 @@ namespace container {
 		}
 	};
 }
-
 
 #endif
